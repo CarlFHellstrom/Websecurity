@@ -67,3 +67,43 @@ To create database in SQL:
         FOREIGN KEY (product_id) REFERENCES products(id)
     );
 
+    CREATE TABLE password_blacklist (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        password VARCHAR(255) NOT NULL
+    );
+
+    INSERT INTO password_blacklist (password) VALUES
+    ('password'),
+    ('Password'),
+    ('123456'),
+    ('12345678'),
+    ('iloveyou'),
+    ('qwerty'),
+    ('admin'),
+    ('welcome'),
+    ('abc123'),
+    ('letmein'),
+    ('monkey'),
+    ('dragon'),
+    ('football'),
+    ('princess'),
+    ('123123');
+    ('Password1!'),
+    ('Welcome1!'),
+    ('Admin123!'),
+    ('Qwerty12!'),
+    ('Abc12345!'),
+    ('Summer23!'),
+    ('Winter21!'),
+    ('Spring2023!'),
+    ('Hello123!'),
+    ('Test1234!'),
+    ('Letmein1!'),
+    ('Welcome@123'),
+    ('Admin@2024'),
+    ('Password@123'),
+    ('October2024!');
+
+
+
+

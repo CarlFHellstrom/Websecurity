@@ -4,27 +4,53 @@ require 'db.php';
 
 $errors = [];
 
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $username = trim($_POST['username']);
     $password = $_POST['password'];
     $address = trim($_POST['address']);
 
-    // Basic validation
     if (strlen($username) < 3) {
         $errors[] = "Username must be at least 3 characters.";
     }
 
-    if (strlen($password) < 6) {
-        $errors[] = "Password must be at least 6 characters.";
+    if (strlen($password) < 8) {
+        $errors[] = "Password must be at least 8 characters long.";
     }
+
+    if (!preg_match('/[A-Z]/', $password)) {
+        $errors[] = "Password must contain at least one uppercase letter (A–Z).";
+    }
+
+    if (!preg_match('/[a-z]/', $password)) {
+        $errors[] = "Password must contain at least one lowercase letter (a–z).";
+    }
+
+    if (!preg_match('/[0-9]/', $password)) {
+        $errors[] = "Password must contain at least one digit (0–9).";
+    }
+
+    if (!preg_match('/[\W_]/', $password)) {
+        $errors[] = "Password must contain at least one special character (!@#$%^&* etc).";
+    }
+
+    // Check password blacklist
+    $stmt = $mysqli->prepare("SELECT id FROM password_blacklist WHERE password = ?");
+    $stmt->bind_param("s", $password);
+    $stmt->execute();
+    $stmt->store_result();
+
+    if ($stmt->num_rows > 0) {
+        $errors[] = "This password is too common and cannot be used. Choose a stronger password.";
+    }
+
+    $stmt->close();
+
 
     if (empty($address)) {
         $errors[] = "Address is required.";
     }
 
-    // Check if username already exists
     $stmt = $mysqli->prepare("SELECT id FROM users WHERE username = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
@@ -34,7 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $stmt->close();
 
-    // If no errors, create user
     if (empty($errors)) {
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
@@ -80,6 +105,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <button type="submit">Create Account</button>
         </form>
+        <p><strong>Password requirements:</strong></p>
+        <ul>
+            <li>At least 8 characters</li>
+            <li>At least one uppercase letter (A–Z)</li>
+            <li>At least one lowercase letter (a–z)</li>
+            <li>At least one number (0–9)</li>
+            <li>At least one special character (!@#$%^&* etc.)</li>
+        </ul>
+
 
     </body>
 </html>
