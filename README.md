@@ -104,6 +104,9 @@ To create database in SQL:
     ('Password@123'),
     ('October2024!');
 
+    ALTER TABLE users
+    ADD failed_attempts INT DEFAULT 0,
+    ADD lock_until DATETIME DEFAULT NULL;
 
 
 

@@ -1,6 +1,7 @@
 <?php
 session_start();
 require 'db.php';
+date_default_timezone_set('Europe/Stockholm');
 
 $errors = [];
 
@@ -15,32 +16,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
     $password = $_POST['password'];
 
-    // Fetch user from database
-    $stmt = $mysqli->prepare("SELECT id, password_hash FROM users WHERE username = ?");
+    // 1. Fetch user row with brute-force fields
+    $stmt = $mysqli->prepare("
+        SELECT id, password_hash, failed_attempts, lock_until
+        FROM users
+        WHERE username = ?
+    ");
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $stmt->store_result();
 
     if ($stmt->num_rows === 1) {
-        $stmt->bind_result($user_id, $password_hash);
+
+        $stmt->bind_result($user_id, $password_hash, $failed_attempts, $lock_until);
         $stmt->fetch();
+        $stmt->close(); // STOP using $stmt after this
 
-        // Verify password
-        if (password_verify($password, $password_hash)) {
-            // Login successful
-            $_SESSION['username'] = $username;
-            $_SESSION['user_id'] = $user_id;
+        // 2. Is account locked?
+        if ($lock_until !== null && strtotime($lock_until) > time()) {
+            $errors[] = "Account locked due to too many failed attempts. Try again later.";
 
-            header("Location: index.php");
-            exit;
         } else {
-            $errors[] = "Incorrect password.";
-        }
-    } else {
-        $errors[] = "User not found.";
-    }
 
-    $stmt->close();
+            // 3. Check password
+            if (password_verify($password, $password_hash)) {
+
+                // SUCCESS — reset failed attempts & lock
+                $reset = $mysqli->prepare("UPDATE users 
+                                           SET failed_attempts = 0, lock_until = NULL 
+                                           WHERE id = ?");
+                $reset->bind_param("i", $user_id);
+                $reset->execute();
+                $reset->close();
+
+                // Login user
+                $_SESSION['username'] = $username;
+                $_SESSION['user_id'] = $user_id;
+
+                header("Location: index.php");
+                exit;
+
+            } else {
+
+                // WRONG PASSWORD
+                $failed_attempts++;
+
+                if ($failed_attempts >= 5) {
+
+                    // LOCK ACCOUNT for 5 minutes
+                    $lock_time = date("Y-m-d H:i:s", time() + 5 * 60);
+
+                    $lock = $mysqli->prepare("
+                        UPDATE users 
+                        SET failed_attempts = ?, lock_until = ? 
+                        WHERE id = ?
+                    ");
+                    $lock->bind_param("isi", $failed_attempts, $lock_time, $user_id);
+                    $lock->execute();
+                    $lock->close();
+
+                    $errors[] = "Too many failed attempts. Account locked for 5 minutes.";
+
+                } else {
+
+                    // Just increment failed_attempts
+                    $update = $mysqli->prepare("
+                        UPDATE users 
+                        SET failed_attempts = ? 
+                        WHERE id = ?
+                    ");
+                    $update->bind_param("ii", $failed_attempts, $user_id);
+                    $update->execute();
+                    $update->close();
+
+                    $errors[] = "Incorrect password.";
+                }
+            }
+        }
+
+    } else {
+
+        // No such user
+        $errors[] = "User not found.";
+        $stmt->close();
+    }
 }
 ?>
 
