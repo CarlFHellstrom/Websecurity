@@ -10,15 +10,13 @@ To create database:
     CREATE DATABASE webshop;
     USE webshop;
 
-To create table: 
     CREATE TABLE products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     price DECIMAL(10,2) NOT NULL
-);
+    );
 
-To insert energy drinks: 
     INSERT INTO products (name, description, price) VALUES
     ('Red Bull 250ml', 'Classic Red Bull Energy Drink 250ml', 19.90),
     ('Red Bull Sugarfree 250ml', 'Sugarfree variant of Red Bull', 18.90),
@@ -42,12 +40,11 @@ To insert energy drinks:
 
     ('Prime Energy Blue Raspberry 330ml', 'Blue raspberry flavor, US import', 34.90),
     ('Prime Energy Ice Pop 330ml', 'Ice pop flavor, US import', 34.90);
-
-To add users: 
+ 
     CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     address VARCHAR(255) NOT NULL
-);
+    );
 
