@@ -14,7 +14,7 @@ $stmt = $mysqli->prepare("
     FROM orders
     WHERE id = ?
 ");
-stmt->bind_param("i", $order_id);
+$stmt->bind_param("i", $order_id);
 $stmt->execute();
 $stmt->bind_result($total, $created_at);
 $stmt->fetch();
