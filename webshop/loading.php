@@ -3,7 +3,6 @@ session_start();
 require 'db.php';
 require 'csrf.php';
 
-// Must be POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo "Method not allowed.";

@@ -55,6 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $reset->close();
 
                     // Login user
+                    session_regenerate_id(true);
+
                     $_SESSION['username'] = $username;
                     $_SESSION['user_id'] = $user_id;
 

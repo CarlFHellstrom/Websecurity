@@ -108,5 +108,3 @@ To create database in SQL:
     ADD failed_attempts INT DEFAULT 0,
     ADD lock_until DATETIME DEFAULT NULL;
 
-
-
