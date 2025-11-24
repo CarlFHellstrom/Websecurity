@@ -1,57 +1,56 @@
 <?php
 session_start();
-
-if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
-    die("No order found.");
-}
-
 require 'db.php';
 
-// Calculate totals
-$cart = $_SESSION['cart'];
-$product_ids = implode(",", array_keys($cart));
-
-$query = "SELECT * FROM products WHERE id IN ($product_ids)";
-$result = $mysqli->query($query);
-
-$total = 0;
-$items = [];
-
-while ($row = $result->fetch_assoc()) {
-    $id = $row['id'];
-    $quantity = $cart[$id];
-    $subtotal = $quantity * $row['price'];
-    $total += $subtotal;
-
-    $items[] = [
-        'name' => $row['name'],
-        'price' => $row['price'],
-        'quantity' => $quantity,
-        'subtotal' => $subtotal
-    ];
+if (!isset($_SESSION['last_order_id'])) {
+    die("No recent order found.");
 }
 
-// Clear cart after purchase
-unset($_SESSION['cart']);
+$order_id = $_SESSION['last_order_id'];
+
+// Fetch the order
+$stmt = $mysqli->prepare("
+    SELECT total_amount, created_at
+    FROM orders
+    WHERE id = ?
+");
+stmt->bind_param("i", $order_id);
+$stmt->execute();
+$stmt->bind_result($total, $created_at);
+$stmt->fetch();
+$stmt->close();
+
+// Fetch the items
+$query = "
+    SELECT p.name, oi.quantity, oi.unit_price
+    FROM order_items oi
+    JOIN products p ON oi.product_id = p.id
+    WHERE oi.order_id = $order_id
+";
+$result = $mysqli->query($query);
 ?>
 <!DOCTYPE html>
 <html>
-<body>
-<h1>Receipt</h1>
+    <body>
 
-<?php foreach ($items as $item): ?>
-    <p>
-        <?php echo $item['quantity']; ?> × 
-        <?php echo htmlspecialchars($item['name']); ?> — 
-        <?php echo $item['subtotal']; ?> kr
-    </p>
-<?php endforeach; ?>
+        <h1>Receipt</h1>
 
-<h2>Total paid: <?php echo $total; ?> kr</h2>
+        <p>Order Number: <?php echo $order_id; ?></p>
+        <p>Date: <?php echo $created_at; ?></p>
+        <hr>
 
-<p>Thank you for your purchase!</p>
+        <?php while ($row = $result->fetch_assoc()): ?>
+            <p>
+                <?php echo $row['quantity']; ?> × 
+                <?php echo htmlspecialchars($row['name']); ?>
+                @ <?php echo $row['unit_price']; ?> kr  
+            </p>
+        <?php endwhile; ?>
 
-<a href="index.php">Back to shop</a>
+        <hr>
+        <h2>Total: <?php echo $total; ?> kr</h2>
 
-</body>
+        <a href="index.php">Back to shop</a>
+
+    </body>
 </html>

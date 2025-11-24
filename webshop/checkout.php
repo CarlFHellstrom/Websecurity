@@ -8,6 +8,11 @@ if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
     exit;
 }
 
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit;
+}
+
 $cart = $_SESSION['cart'];
 $product_ids = implode(",", array_keys($cart));
 
