@@ -1,6 +1,11 @@
 <?php
 session_start();
 require 'db.php';
+require 'csrf.php'; // ← You forgot the semicolon!
+
+// Flash message (optional)
+$flash = $_SESSION['flash_message'] ?? null;
+unset($_SESSION['flash_message']);
 ?>
 
 <!DOCTYPE html>
@@ -29,11 +34,14 @@ require 'db.php';
                 <p><?php echo htmlspecialchars($row['description']); ?></p>
                 <p><strong><?php echo $row['price']; ?> kr</strong></p>
 
+                <!-- Add to Cart with CSRF -->
                 <form action="add_to_cart.php" method="post">
                     <input type="hidden" name="product_id" value="<?php echo $row['id']; ?>">
+                    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                     <button type="submit">Add to cart</button>
                 </form>
             </div>
+
         <?php endwhile; ?>
 
         <a href="cart.php">Go to cart</a>

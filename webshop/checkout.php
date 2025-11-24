@@ -1,6 +1,7 @@
 <?php
 session_start();
 require 'db.php';
+require 'csrf.php';
 
 // If cart is empty, redirect back
 if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
@@ -8,6 +9,7 @@ if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
     exit;
 }
 
+// Require login
 if (!isset($_SESSION['username'])) {
     header("Location: login.php");
     exit;
@@ -38,26 +40,27 @@ while ($row = $result->fetch_assoc()) {
 ?>
 <!DOCTYPE html>
 <html>
-<body>
+    <body>
 
-<h1>Checkout</h1>
-<a href="cart.php">⬅ Back to cart</a>
+        <h1>Checkout</h1>
+        <a href="cart.php">⬅ Back to cart</a>
 
-<h2>Your Order</h2>
+        <h2>Your Order</h2>
 
-<?php foreach ($items as $item): ?>
-<p>
-    <?php echo $item['quantity']; ?> × 
-    <?php echo htmlspecialchars($item['name']); ?> — 
-    <?php echo $item['subtotal']; ?> kr
-</p>
-<?php endforeach; ?>
+        <?php foreach ($items as $item): ?>
+        <p>
+            <?php echo $item['quantity']; ?> × 
+            <?php echo htmlspecialchars($item['name']); ?> — 
+            <?php echo $item['subtotal']; ?> kr
+        </p>
+        <?php endforeach; ?>
 
-<h2>Total: <?php echo $total; ?> kr</h2>
+        <h2>Total: <?php echo $total; ?> kr</h2>
 
-<form action="loading.php" method="post">
-    <button type="submit">Purchase</button>
-</form>
+        <form action="loading.php" method="post">
+            <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+            <button type="submit">Purchase</button>
+        </form>
 
-</body>
+    </body>
 </html>
