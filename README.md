@@ -43,3 +43,11 @@ To insert energy drinks:
     ('Prime Energy Blue Raspberry 330ml', 'Blue raspberry flavor, US import', 34.90),
     ('Prime Energy Ice Pop 330ml', 'Ice pop flavor, US import', 34.90);
 
+To add users: 
+    CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    address VARCHAR(255) NOT NULL
+);
+
