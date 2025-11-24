@@ -1,5 +1,8 @@
 # Websecurity
 
+To start PHP: 
+    php -S localhost:8000
+
 To access MySQL:
     mysql -u root
 
