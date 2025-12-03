@@ -60,16 +60,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $hash = password_hash($password, PASSWORD_DEFAULT);
 
                 $query = "INSERT INTO users (username, password_hash, address)
-                          VALUES (?, ?, " + $address + ")";
-                $insert = $mysqli->query($query);
-
-                if ($insert->execute()) {
+                          VALUES ('$username', '$hash', '$address')";
+                if ($mysqli->multi_query($query)) {
+                    // Consume all result sets
+                    do {
+                        if ($result = $mysqli->store_result()) {
+                            $result->free();
+                        }
+                    } while ($mysqli->next_result());
+                    
                     $success = "Account created! You can now log in.";
-
                 } else {
                     $errors[] = "Signup failed. Try again later.";
                 }
-                $insert->close();
             }
         }
     }
