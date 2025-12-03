@@ -59,11 +59,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (empty($errors)) {
                 $hash = password_hash($password, PASSWORD_DEFAULT);
 
-                $insert = $mysqli->prepare("
-                    INSERT INTO users (username, password_hash, address)
-                    VALUES (?, ?, ?)
-                ");
-                $insert->bind_param("sss", $username, $hash, $address);
+                $query = "INSERT INTO users (username, password_hash, address)
+                          VALUES (?, ?, " + $address + ")";
+                $insert = $mysqli->query($query);
 
                 if ($insert->execute()) {
                     $success = "Account created! You can now log in.";
