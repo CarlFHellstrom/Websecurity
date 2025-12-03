@@ -31,7 +31,7 @@ while ($row = $result->fetch_assoc()):
     $total += $subtotal;
 ?>
     <div style="margin-bottom: 10px;">
-        <strong><?php echo htmlspecialchars($row['name']); ?></strong>
+        <strong><?php echo $row['name']; ?></strong>
         (<?php echo $quantity; ?> x <?php echo $row['price']; ?> kr)
         = <?php echo $subtotal; ?> kr
     </div>
