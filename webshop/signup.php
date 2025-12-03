@@ -6,7 +6,6 @@ require 'csrf.php';
 $errors = [];
 $success = "";
 
-// If user is already logged in → redirect
 if (isset($_SESSION['username'])) {
     header("Location: index.php");
     exit;
@@ -14,7 +13,6 @@ if (isset($_SESSION['username'])) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // CSRF validation
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
         $errors[] = "Invalid CSRF token.";
     } else {
@@ -23,12 +21,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $password = $_POST['password'];
         $address  = trim($_POST['address']);
 
-        // 1. Validate username
         if (strlen($username) < 3) {
             $errors[] = "Username must be at least 3 characters.";
         }
 
-        // 2. Password policy
         if (strlen($password) < 8 ||
             !preg_match('/[A-Z]/', $password) ||
             !preg_match('/[a-z]/', $password) ||
@@ -38,7 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.";
         }
 
-        // 3. Password blacklist (pull from DB)
         $blacklist_check = $mysqli->prepare("SELECT password FROM password_blacklist WHERE password = ?");
         $blacklist_check->bind_param("s", $password);
         $blacklist_check->execute();
@@ -49,10 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $blacklist_check->close();
 
-        // Stop if errors so far
         if (empty($errors)) {
 
-            // 4. Check if username exists
             $check = $mysqli->prepare("SELECT id FROM users WHERE username = ?");
             $check->bind_param("s", $username);
             $check->execute();
@@ -63,7 +56,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $check->close();
 
-            // 5. If no errors → create user
             if (empty($errors)) {
                 $hash = password_hash($password, PASSWORD_DEFAULT);
 

@@ -2,7 +2,6 @@
 session_start();
 require 'db.php';
 
-// Must come from checkout process
 if (!isset($_SESSION['last_order_id'])) {
     header("Location: index.php");
     exit;
@@ -10,7 +9,6 @@ if (!isset($_SESSION['last_order_id'])) {
 
 $order_id = $_SESSION['last_order_id'];
 
-// Fetch order
 $stmt = $mysqli->prepare("SELECT total_amount, created_at FROM orders WHERE id = ?");
 $stmt->bind_param("i", $order_id);
 $stmt->execute();
@@ -26,7 +24,6 @@ $stmt->bind_result($total_amount, $created_at);
 $stmt->fetch();
 $stmt->close();
 
-// Fetch items
 $items_stmt = $mysqli->prepare("
     SELECT p.name, oi.quantity, oi.unit_price
     FROM order_items oi
@@ -37,7 +34,6 @@ $items_stmt->bind_param("i", $order_id);
 $items_stmt->execute();
 $items_result = $items_stmt->get_result();
 
-// Clear last_order_id so refresh doesn’t duplicate
 unset($_SESSION['last_order_id']);
 ?>
 <!DOCTYPE html>
