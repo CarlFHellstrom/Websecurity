@@ -138,3 +138,11 @@ if ($mysqli->multi_query($query)) {
     $errors[] = "Signup failed. Try again later.";
 }
 ```
+## Cross-site scripting
+### Description
+Via the sql injection it's possible to add html with javascript that execute on other users browsers. This is possible if the website does not check html special chars.
+### Code changes
+```php
+// In cart.php line 34
+<strong><?php echo $row['name']; ?></strong>
+```
