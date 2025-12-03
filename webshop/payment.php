@@ -27,32 +27,62 @@ $total = $_SESSION['pending_total'];
 $SHOP_WALLET_ADDRESS = "FPnelHrkS83dOhq4EONnJsGHWAKArahE8bbFBzDrbcBsJGE2Bbo2jfWnT3N24V6muCPrZQMziTUIXHh7BVjvJg==";
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blockchain Payment</title>
+    <link rel="stylesheet" href="style.css">
+</head>
 <body>
+<div class="page">
 
-<h1>Blockchain Payment</h1>
-<a href="checkout.php">⬅ Back to checkout</a>
+    <header class="header">
+        <div class="header-title">Blockchain Payment</div>
+        <div class="nav">
+            <a href="index.php">Shop</a>
+            <a href="cart.php">Cart</a>
+            <a href="checkout.php">Checkout</a>
+            <span class="header-user">
+                Logged in as <strong><?php echo htmlspecialchars($_SESSION['username']); ?></strong>
+            </span>
+            <a href="logout.php">Logout</a>
+        </div>
+    </header>
 
-<p>Total to pay: <strong><?php echo $total; ?> kr</strong></p>
+    <div class="card">
+        <h2>Complete your payment</h2>
 
-<p>
-    Send <strong><?php echo $total; ?> kr</strong> to the webshop's wallet address:<br>
-    <code><?php echo htmlspecialchars($SHOP_WALLET_ADDRESS); ?></code>
-</p>
+        <p style="margin-bottom: 8px;">
+            Total to pay: <strong><?php echo $total; ?> kr</strong>
+        </p>
 
-<p>
-    Use your SimpleCoin wallet program to send the payment and mine a block.
-    When you are done, paste the <strong>transaction ID</strong> from the wallet below.
-</p>
+        <p style="margin-bottom: 8px;">
+            Send <strong><?php echo $total; ?> kr</strong> to the webshop's wallet address:
+        </p>
 
-<form action="loading.php" method="post">
-    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+        <p style="margin-bottom: 12px;">
+            <code><?php echo htmlspecialchars($SHOP_WALLET_ADDRESS); ?></code>
+        </p>
 
-    <label>Transaction ID from wallet:</label><br>
-    <input type="text" name="tx_id" required style="width: 300px;"><br><br>
+        <p style="margin-bottom: 16px;">
+            Use your SimpleCoin wallet program to send the payment and mine a block.
+            When you are done, paste the <strong>transaction ID</strong> from the wallet below.
+        </p>
 
-    <button type="submit">Confirm Payment</button>
-</form>
+        <form action="loading.php" method="post">
+            <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
 
+            <label for="tx_id">Transaction ID from wallet</label>
+            <input type="text" id="tx_id" name="tx_id" required>
+
+            <button type="submit">Confirm payment</button>
+        </form>
+
+        <div class="page-footer-links">
+            <a href="checkout.php">Back to checkout</a>
+        </div>
+    </div>
+
+</div>
 </body>
 </html>

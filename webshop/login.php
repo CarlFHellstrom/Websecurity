@@ -12,11 +12,9 @@ if (isset($_SESSION['username'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
         $errors[] = "Invalid CSRF token.";
     } else {
-
         $username = trim($_POST['username']);
         $password = $_POST['password'];
 
@@ -30,22 +28,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->store_result();
 
         if ($stmt->num_rows === 1) {
-
             $stmt->bind_result($user_id, $password_hash, $failed_attempts, $lock_until);
             $stmt->fetch();
-            $stmt->close(); 
+            $stmt->close();
 
             if ($lock_until !== null && strtotime($lock_until) > time()) {
                 $errors[] = "Account locked due to too many failed attempts. Try again later.";
-
             } else {
-
-
                 if (password_verify($password, $password_hash)) {
-
-                    $reset = $mysqli->prepare("UPDATE users 
-                                            SET failed_attempts = 0, lock_until = NULL 
-                                            WHERE id = ?");
+                    $reset = $mysqli->prepare("
+                        UPDATE users 
+                        SET failed_attempts = 0, lock_until = NULL 
+                        WHERE id = ?
+                    ");
                     $reset->bind_param("i", $user_id);
                     $reset->execute();
                     $reset->close();
@@ -57,15 +52,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     header("Location: index.php");
                     exit;
-
                 } else {
-
                     $failed_attempts++;
 
                     if ($failed_attempts >= 5) {
-
                         $lock_time = date("Y-m-d H:i:s", time() + 5 * 60);
-
                         $lock = $mysqli->prepare("
                             UPDATE users 
                             SET failed_attempts = ?, lock_until = ? 
@@ -74,11 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $lock->bind_param("isi", $failed_attempts, $lock_time, $user_id);
                         $lock->execute();
                         $lock->close();
-
                         $errors[] = "Too many failed attempts. Account locked for 5 minutes.";
-
                     } else {
-
                         $update = $mysqli->prepare("
                             UPDATE users 
                             SET failed_attempts = ? 
@@ -87,50 +75,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $update->bind_param("ii", $failed_attempts, $user_id);
                         $update->execute();
                         $update->close();
-
                         $errors[] = "Incorrect password.";
                     }
                 }
             }
-
         } else {
-
             $errors[] = "User not found.";
             $stmt->close();
         }
     }
 }
 ?>
-
 <!DOCTYPE html>
-<html>
-    <body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
 
-        <h1>Login</h1>
-        <a href="index.php">⬅ Back</a>
+    <header class="header">
+        <div class="header-title">Login</div>
+        <div class="nav">
+            <a href="index.php">Back to shop</a>
+            <a href="signup.php">Sign up</a>
+        </div>
+    </header>
 
-        <?php
-        if (!empty($errors)) {
-            echo "<div style='background:#f8d7da; padding:10px; color:#721c24; 
-                        border:1px solid #f5c6cb; margin-bottom:10px;'>";
-            foreach ($errors as $e) {
-                echo "<p>" . htmlspecialchars($e) . "</p>";
-            }
-            echo "</div>";
-        }
-        ?>
+    <div class="card">
+        <h2>Sign in</h2>
 
-        <form method="post">
-            <label>Username:</label><br>
-            <input type="text" name="username" required><br><br>
+        <?php if (!empty($errors)): ?>
+            <div class="alert alert-error">
+                <?php foreach ($errors as $e): ?>
+                    <p><?php echo htmlspecialchars($e); ?></p>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
 
-            <label>Password:</label><br>
-            <input type="password" name="password" required><br><br>
+        <form method="post" action="login.php">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
 
             <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
 
             <button type="submit">Login</button>
         </form>
+    </div>
 
-    </body>
+</div>
+</body>
 </html>
