@@ -108,3 +108,33 @@ To create database in SQL:
     ADD failed_attempts INT DEFAULT 0,
     ADD lock_until DATETIME DEFAULT NULL;
 
+# Attacks
+## SQL injections
+### Description
+Changing the SQL from parameter-based and prepared queries to raw queries creates a vulnerability for SQL-injection in the signup page.
+
+We can write as an address:
+```sql
+Lund'); SET FOREIGN_KEY_CHECKS=0; DROP TABLE users; SET FOREIGN_KEY_CHECKS=1; --
+``` 
+
+### Code changes
+```php
+// In signup.php line 60
+$hash = password_hash($password, PASSWORD_DEFAULT);
+
+$query = "INSERT INTO users (username, password_hash, address)
+          VALUES ('$username', '$hash', '$address')";
+if ($mysqli->multi_query($query)) {
+    // Consume all result sets
+    do {
+        if ($result = $mysqli->store_result()) {
+            $result->free();
+        }
+    } while ($mysqli->next_result());
+    
+    $success = "Account created! You can now log in.";
+} else {
+    $errors[] = "Signup failed. Try again later.";
+}
+```
