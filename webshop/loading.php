@@ -3,25 +3,21 @@ session_start();
 require 'db.php';
 require 'csrf.php';
 
-// Must be POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo "Method not allowed.";
     exit;
 }
 
-// CSRF check
 if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
     die("CSRF validation failed.");
 }
 
-// Must be logged in
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
 
-// Must have a cart + pending total
 if (!isset($_SESSION['cart']) || empty($_SESSION['cart']) || !isset($_SESSION['pending_total'])) {
     header("Location: cart.php");
     exit;
@@ -30,13 +26,11 @@ if (!isset($_SESSION['cart']) || empty($_SESSION['cart']) || !isset($_SESSION['p
 $cart  = $_SESSION['cart'];
 $total = $_SESSION['pending_total'];
 
-// Get transaction id from payment step
 $tx_id = $_POST['tx_id'] ?? null;
 if ($tx_id === null || $tx_id === '') {
     die("Missing transaction ID.");
 }
 
-// Fetch product data for items in cart
 $product_ids = implode(",", array_keys($cart));
 $query = "SELECT * FROM products WHERE id IN ($product_ids)";
 $result = $mysqli->query($query);
@@ -52,7 +46,6 @@ while ($row = $result->fetch_assoc()) {
     ];
 }
 
-// Insert order (now includes tx_id)
 $user_id = $_SESSION['user_id'];
 
 $stmt = $mysqli->prepare("INSERT INTO orders (user_id, total_amount, tx_id) VALUES (?, ?, ?)");
@@ -61,7 +54,6 @@ $stmt->execute();
 $order_id = $stmt->insert_id;
 $stmt->close();
 
-// Insert order items
 $stmt = $mysqli->prepare("
     INSERT INTO order_items (order_id, product_id, quantity, unit_price)
     VALUES (?, ?, ?, ?)
@@ -80,13 +72,10 @@ foreach ($items as $item) {
 
 $stmt->close();
 
-// Clear cart + pending total
 unset($_SESSION['cart'], $_SESSION['pending_total']);
 
-// Save order id for receipt
 $_SESSION['last_order_id'] = $order_id;
 
-// Simulate processing time
 sleep(2);
 
 header("Location: receipt.php");

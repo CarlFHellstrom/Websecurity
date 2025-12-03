@@ -3,24 +3,20 @@ session_start();
 require 'db.php';
 require 'csrf.php';
 
-// Måste komma från checkout via POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header("Location: cart.php");
     exit;
 }
 
-// CSRF-koll
 if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
     die("CSRF validation failed.");
 }
 
-// Måste vara inloggad
 if (!isset($_SESSION['username'], $_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
 
-// Måste ha pending_total + cart
 if (!isset($_SESSION['pending_total']) || !isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
     header("Location: cart.php");
     exit;
@@ -28,7 +24,6 @@ if (!isset($_SESSION['pending_total']) || !isset($_SESSION['cart']) || empty($_S
 
 $total = $_SESSION['pending_total'];
 
-// Sätt denna till adressen du fick i shop.txt från SimpleCoin-walleten
 $SHOP_WALLET_ADDRESS = "FPnelHrkS83dOhq4EONnJsGHWAKArahE8bbFBzDrbcBsJGE2Bbo2jfWnT3N24V6muCPrZQMziTUIXHh7BVjvJg==";
 ?>
 <!DOCTYPE html>

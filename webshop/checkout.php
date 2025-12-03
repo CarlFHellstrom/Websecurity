@@ -3,13 +3,11 @@ session_start();
 require 'db.php';
 require 'csrf.php';
 
-// If cart is empty, redirect back
 if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
     header("Location: cart.php");
     exit;
 }
 
-// Require login
 if (!isset($_SESSION['username'])) {
     header("Location: login.php");
     exit;
@@ -38,7 +36,6 @@ while ($row = $result->fetch_assoc()) {
     ];
 }
 
-// spara totalen i sessionen tills payment/loading är klart
 $_SESSION['pending_total'] = $total;
 ?>
 <!DOCTYPE html>
