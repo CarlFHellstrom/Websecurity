@@ -1,5 +1,9 @@
 # Websecurity
 
+To get SimpleCoin to work on Mac: 
+    python3 -m pip install -r requirements.txt
+    python3 miner.py
+
 To start PHP: 
     php -S localhost:8000
 
