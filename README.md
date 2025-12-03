@@ -2,7 +2,12 @@
 
 To get SimpleCoin to work on Mac: 
     python3 -m pip install -r requirements.txt
+
+To start miner:
     python3 miner.py
+
+To start wallet:
+    python3 wallet.py
 
 To start PHP: 
     php -S localhost:8000
