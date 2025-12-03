@@ -224,7 +224,7 @@ def transaction():
         # On each new POST request, we extract the transaction data
         new_txion = request.get_json()
         # Then we add the transaction to our list
-        if validate_signature(new_txion['from'], new_txion['signature'], new_txion['message']):
+        if validate_signature(new_txion):
             NODE_PENDING_TRANSACTIONS.append(new_txion)
             # Because the transaction was successfully
             # submitted, we log it to our console
@@ -244,19 +244,37 @@ def transaction():
         return pending
 
 
-def validate_signature(public_key, signature, message):
-    """Verifies if the signature is correct. This is used to prove
-    it's you (and not someone else) trying to do a transaction with your
-    address. Called when a user tries to submit a new transaction.
+def validate_signature(tx):
     """
-    public_key = (base64.b64decode(public_key)).hex()
-    signature = base64.b64decode(signature)
-    vk = ecdsa.VerifyingKey.from_string(bytes.fromhex(public_key), curve=ecdsa.SECP256k1)
-    # Try changing into an if/else statement as except is too broad.
+    Verifies if the transaction signature is correct.
+
+    This binds the signature to the full transaction:
+    (from, to, amount, message/timestamp).
+
+    tx: dict with keys 'from', 'to', 'amount', 'message', 'signature'
+    """
+    public_key_b64 = tx['from']
+    signature_b64 = tx['signature']
+    timestamp = tx['message']
+
+    # Build the same canonical transaction string as in wallet.py
+    tx_string = f"{public_key_b64}|{tx['to']}|{str(tx['amount'])}|{timestamp}"
+    bmessage = tx_string.encode()
+
+    # Decode public key and signature
+    public_key_hex = base64.b64decode(public_key_b64).hex()
+    signature = base64.b64decode(signature_b64)
+
+    vk = ecdsa.VerifyingKey.from_string(
+        bytes.fromhex(public_key_hex),
+        curve=ecdsa.SECP256k1
+    )
+
     try:
-        return vk.verify(signature, message.encode())
-    except:
+        return vk.verify(signature, bmessage)
+    except Exception:
         return False
+
 
 
 def welcome_msg():

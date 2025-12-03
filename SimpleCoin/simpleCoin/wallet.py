@@ -73,16 +73,21 @@ def send_transaction(addr_from, private_key, addr_to, amount):
     # addr_to="SD5IZAuFixM3PTmkm5ShvLm1tbDNOmVlG7tg6F5r7VHxPNWkNKbzZfa+JdKmfBAIhWs9UKnQLOOL1U+R3WxcsQ=="
 
     if len(private_key) == 64:
-        signature, message = sign_ECDSA_msg(private_key)
+        # Sign the full transaction (from, to, amount, timestamp)
+        signature, message = sign_ECDSA_msg(private_key, addr_from, addr_to, amount)
+
         url = 'http://127.0.0.1:5001/txion'
-        payload = {"from": addr_from,
-                   "to": addr_to,
-                   "amount": amount,
-                   "signature": signature.decode(),
-                   "message": message}
+        payload = {
+            "from": addr_from,
+            "to": addr_to,
+            "amount": amount,
+            "signature": signature.decode(),
+            "message": message  # timestamp, also used as tx_id
+        }
         headers = {"Content-Type": "application/json"}
 
         res = requests.post(url, json=payload, headers=headers)
+        
         print(res.text)
 
         # Show transaction ID (the signed timestamp)
@@ -136,21 +141,40 @@ def generate_ECDSA_keys():
     print(F"Your new address and private key are now in the file {filename}")
 
 
-def sign_ECDSA_msg(private_key):
-    """Sign the message to be sent
-    private_key: must be hex
-
-    return
-    signature: base64 (to make it shorter)
-    message: str
+def sign_ECDSA_msg(private_key, addr_from, addr_to, amount, timestamp=None):
     """
-    # Get timestamp, round it, make it into a string and encode it to bytes
-    message = str(round(time.time()))
-    bmessage = message.encode()
-    sk = ecdsa.SigningKey.from_string(bytes.fromhex(private_key), curve=ecdsa.SECP256k1)
-    signature = base64.b64encode(sk.sign(bmessage))
-    return signature, message
+    Sign the full transaction:
+    (from, to, amount, timestamp) using ECDSA.
 
+    - private_key: must be hex
+    - addr_from: base64 public key (wallet address)
+    - addr_to: recipient address (base64)
+    - amount: string or number
+    - timestamp: optional; if None, current time is used
+
+    Returns:
+        signature: base64-encoded ECDSA signature
+        timestamp: string, also used as transaction ID
+    """
+    # Use a timestamp as before (also used as tx_id)
+    if timestamp is None:
+        timestamp = str(round(time.time()))
+
+    # Build a canonical transaction string to sign
+    tx_string = f"{addr_from}|{addr_to}|{str(amount)}|{timestamp}"
+    bmessage = tx_string.encode()
+
+    # Create signing key from private key (hex -> bytes)
+    sk = ecdsa.SigningKey.from_string(
+        bytes.fromhex(private_key),
+        curve=ecdsa.SECP256k1
+    )
+
+    # Sign the transaction string using ECDSA and encode in base64
+    signature = base64.b64encode(sk.sign(bmessage))
+
+    # We return the timestamp as `message` for compatibility
+    return signature, timestamp
 
 if __name__ == '__main__':
     print("""       =========================================\n
