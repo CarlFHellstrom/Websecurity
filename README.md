@@ -30,6 +30,8 @@ Setting Up the MySQL Database:
         );
 
         INSERT INTO products (name, description, price) VALUES
+        ('Iron Maiden 3l', 'The biggest drink in our assortment', '300'),
+        ('Iron Miaden 2l', 'Smaller Iron Maiden drink', '250'),
         ('Red Bull 250ml', 'Classic Red Bull Energy Drink 250ml', 19.90),
         ('Red Bull Sugarfree 250ml', 'Sugarfree variant of Red Bull', 18.90),
         ('Red Bull Summer Edition 250ml', 'Seasonal limited Red Bull flavor', 20.90),
