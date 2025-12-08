@@ -5,6 +5,8 @@ require 'csrf.php';
 
 $errors = [];
 $success = "";
+$username_value = "";
+$address_value = "";
 
 if (isset($_SESSION['username'])) {
     header("Location: index.php");
@@ -12,25 +14,27 @@ if (isset($_SESSION['username'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
         $errors[] = "Invalid CSRF token.";
     } else {
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $address  = trim($_POST['address'] ?? '');
 
-        $username = trim($_POST['username']);
-        $password = $_POST['password'];
-        $address  = trim($_POST['address']);
+        $username_value = $username;
+        $address_value = $address;
 
         if (strlen($username) < 3) {
             $errors[] = "Username must be at least 3 characters.";
         }
 
-        if (strlen($password) < 8 ||
+        if (
+            strlen($password) < 8 ||
             !preg_match('/[A-Z]/', $password) ||
             !preg_match('/[a-z]/', $password) ||
             !preg_match('/[0-9]/', $password) ||
-            !preg_match('/[^A-Za-z0-9]/', $password)) {
-
+            !preg_match('/[^A-Za-z0-9]/', $password)
+        ) {
             $errors[] = "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.";
         }
 
@@ -45,7 +49,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $blacklist_check->close();
 
         if (empty($errors)) {
-
             $check = $mysqli->prepare("SELECT id FROM users WHERE username = ?");
             $check->bind_param("s", $username);
             $check->execute();
@@ -70,6 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     } while ($mysqli->next_result());
                     
                     $success = "Account created! You can now log in.";
+                    $username_value = "";
+                    $address_value = "";
                 } else {
                     $errors[] = "Signup failed. Try again later.";
                 }
@@ -77,48 +82,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
 ?>
-
 <!DOCTYPE html>
-<html>
-    <body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign up</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
 
-        <h1>Signup</h1>
-        <a href="index.php">⬅ Back</a>
+    <header class="header">
+        <div class="header-title">Sign up</div>
+        <div class="nav">
+            <a href="index.php">Back to shop</a>
+            <a href="login.php">Login</a>
+        </div>
+    </header>
 
-        <?php
-        if (!empty($errors)) {
-            echo "<div style='background:#f8d7da; padding:10px; color:#721c24;
-                        border:1px solid #f5c6cb; margin-bottom:10px;'>";
-            foreach ($errors as $e) {
-                echo "<p>" . htmlspecialchars($e) . "</p>";
-            }
-            echo "</div>";
-        }
+    <div class="card">
+        <h2>Create an account</h2>
 
-        if (!empty($success)) {
-            echo "<div style='background:#d4edda; padding:10px; color:#155724;
-                        border:1px solid #c3e6cb; margin-bottom:10px;'>";
-            echo "<p>$success</p>";
-            echo "</div>";
-        }
-        ?>
+        <?php if (!empty($errors)): ?>
+            <div class="alert alert-error">
+                <?php foreach ($errors as $e): ?>
+                    <p><?php echo htmlspecialchars($e); ?></p>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
 
-        <form method="post">
+        <?php if (!empty($success)): ?>
+            <div class="alert alert-success">
+                <p><?php echo htmlspecialchars($success); ?></p>
+            </div>
+        <?php endif; ?>
+
+        <form method="post" action="signup.php">
             <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
 
-            <label>Username:</label><br>
-            <input type="text" name="username" required><br><br>
+            <label for="username">Username</label>
+            <input type="text"
+                   id="username"
+                   name="username"
+                   required
+                   value="<?php echo htmlspecialchars($username_value); ?>">
 
-            <label>Password:</label><br>
-            <input type="password" name="password" required><br><br>
+            <label for="password">Password</label>
+            <input type="password"
+                   id="password"
+                   name="password"
+                   required>
 
-            <label>Home Address:</label><br>
-            <input type="text" name="address" required><br><br>
+            <label for="address">Home address</label>
+            <input type="text"
+                   id="address"
+                   name="address"
+                   required
+                   value="<?php echo htmlspecialchars($address_value); ?>">
 
-            <button type="submit">Create Account</button>
+            <button type="submit">Create account</button>
         </form>
+    </div>
 
-    </body>
+</div>
+</body>
 </html>

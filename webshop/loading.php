@@ -18,27 +18,27 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
+if (!isset($_SESSION['cart']) || empty($_SESSION['cart']) || !isset($_SESSION['pending_total'])) {
     header("Location: cart.php");
     exit;
 }
 
-$cart = $_SESSION['cart'];
+$cart  = $_SESSION['cart'];
+$total = $_SESSION['pending_total'];
+
+$tx_id = $_POST['tx_id'] ?? null;
+if ($tx_id === null || $tx_id === '') {
+    die("Missing transaction ID.");
+}
 
 $product_ids = implode(",", array_keys($cart));
 $query = "SELECT * FROM products WHERE id IN ($product_ids)";
 $result = $mysqli->query($query);
 
-$total = 0;
 $items = [];
-
 while ($row = $result->fetch_assoc()) {
-    $id = $row['id'];
+    $id       = $row['id'];
     $quantity = $cart[$id];
-    $subtotal = $quantity * $row['price'];
-
-    $total += $subtotal;
-
     $items[] = [
         'product_id' => $id,
         'quantity'   => $quantity,
@@ -48,8 +48,8 @@ while ($row = $result->fetch_assoc()) {
 
 $user_id = $_SESSION['user_id'];
 
-$stmt = $mysqli->prepare("INSERT INTO orders (user_id, total_amount) VALUES (?, ?)");
-$stmt->bind_param("id", $user_id, $total);
+$stmt = $mysqli->prepare("INSERT INTO orders (user_id, total_amount, tx_id) VALUES (?, ?, ?)");
+$stmt->bind_param("ids", $user_id, $total, $tx_id);
 $stmt->execute();
 $order_id = $stmt->insert_id;
 $stmt->close();
@@ -72,7 +72,7 @@ foreach ($items as $item) {
 
 $stmt->close();
 
-unset($_SESSION['cart']);
+unset($_SESSION['cart'], $_SESSION['pending_total']);
 
 $_SESSION['last_order_id'] = $order_id;
 
