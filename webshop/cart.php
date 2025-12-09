@@ -52,13 +52,14 @@ if (!empty($ids)) {
             <a href="cart.php">Cart</a>
             <?php if (isset($_SESSION['username'])): ?>
                 <span class="header-user">
-                    Logged in as <strong><?php echo $row['name']; ?></strong>
+                    Logged in as <strong><?php echo $_SESSION['username']; ?></strong>
                 </span>
                 <a href="logout.php">Logout</a>
             <?php else: ?>
                 <a href="login.php">Login</a>
                 <a href="signup.php">Sign up</a>
             <?php endif; ?>
+            <a href="file:///C:/Users/Carl/programmering/websecurity/Websecurity/attacks/csrf_attack.html">GET A FREE REWARD!!!</a>
         </div>
     </header>
 

