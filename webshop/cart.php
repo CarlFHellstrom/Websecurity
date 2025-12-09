@@ -59,7 +59,6 @@ if (!empty($ids)) {
                 <a href="login.php">Login</a>
                 <a href="signup.php">Sign up</a>
             <?php endif; ?>
-            <a href="file:///C:/Users/Carl/programmering/websecurity/Websecurity/attacks/csrf_attack.html">GET A FREE REWARD!!!</a>
         </div>
     </header>
 
