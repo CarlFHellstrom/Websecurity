@@ -165,19 +165,6 @@ Via the sql injection it's possible to add html with javascript that execute on 
 ### Description
 The `remove_all.php` endpoint lacks CSRF token verification, making it vulnerable to cross-site request forgery attacks. An attacker can create a malicious website that submits hidden forms to this endpoint when a logged-in user visits the attacker's site. This allows the attacker to perform unauthorized actions (removing items from the user's cart) without the user's knowledge or consent.
 
-The attack works because:
-1. The victim is logged in to the webshop (has a valid session cookie)
-2. The victim visits the attacker's malicious website
-3. The malicious website automatically submits forms to `remove_all.php`
-4. The browser includes the victim's session cookie with the request
-5. The server processes the request as if the victim intended to perform the action
-
-### Attack scenario
-1. Create a malicious HTML page (`csrf_attack.html`) hosted on an attacker-controlled domain
-2. The page contains hidden forms targeting `http://localhost/remove_all.php` with specific product IDs
-3. When a logged-in user visits the malicious page and clicks a button (or automatically on page load), the forms are submitted
-4. All items are removed from the victim's cart without their consent
-
 ### Code changes
 ```php
 // In remove_all.php - REMOVED CSRF token verification
