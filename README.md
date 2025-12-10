@@ -9,9 +9,15 @@ Start the Miner (runs the blockchain node):
 Start the Wallet (send transactions):
     python3 wallet.py
 
-Start a local PHP server:
+Start a local PHP server with HTTP:
     php -S localhost:8000
     To then open in your browser: http://localhost:8000
+
+Start with HTTPS: 
+    php -S 127.0.0.1:8000
+    
+    In another terminal: 
+        caddy run
 
 Setting Up the MySQL Database:
     Enter MySQL: 
