@@ -171,13 +171,6 @@ The `remove_all.php` endpoint lacks CSRF token verification, making it vulnerabl
 <?php
 session_start();
 
-// VULNERABILITY: No CSRF token verification!
-// Original code would have:
-// require 'csrf.php';
-// if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-//     die("CSRF validation failed.");
-// }
-
 if (!isset($_POST['product_id'])) {
     header("Location: cart.php");
     exit;
