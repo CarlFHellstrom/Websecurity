@@ -1,5 +1,6 @@
 <?php
 session_start();
+require 'csrf.php';
 
 if (!isset($_POST['product_id'])) {
     header("Location: cart.php");
