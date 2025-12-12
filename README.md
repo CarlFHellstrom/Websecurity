@@ -155,6 +155,11 @@ if ($mysqli->multi_query($query)) {
 ## Cross-site scripting
 ### Description
 Via the sql injection it's possible to add html with javascript that execute on other users browsers. This is possible if the website does not check html special chars.
+
+We perform this SQL injection: 
+```sql
+'); INSERT INTO products (name, description, price) VALUES ('<img src=x onerror="alert(''You have been hacked!'')"/>', 'Product', 50); --
+```
 ### Code changes
 ```php
 // In cart.php line 34

@@ -72,7 +72,7 @@ if (!empty($ids)) {
             <?php foreach ($items as $item): ?>
                 <div class="list-row">
                     <span>
-                        <strong><?php echo htmlspecialchars($item['name']); ?></strong>
+                        <strong><?php echo $item['name']; ?></strong>
                         (<?php echo $item['quantity']; ?> × <?php echo $item['price']; ?> kr)
                     </span>
                     <span><?php echo $item['subtotal']; ?> kr</span>
